@@ -35,7 +35,7 @@ Python 3.10+ is recommended.
 
 Install dependencies:
 
-```bash
+
 Install dependencies: `pip install opencv-python numpy`  
 If you only want logging and visualization, these are enough.
 MIDI/sound output is intentionally omitted in this lite version to minimize dependencies.
