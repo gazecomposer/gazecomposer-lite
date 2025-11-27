@@ -90,7 +90,6 @@ For example, you can compare `dwell_ms` distributions across presets, or check h
 
 At a high level, the demo follows this data flow:
 
-```text
 Mouse position  →  Grid cell / dwell tracker  →  Dwell duration
                      ↓
                Dwell→Vibrato mapping (preset)
