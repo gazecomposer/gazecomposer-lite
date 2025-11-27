@@ -123,3 +123,5 @@ feeds parameters into a real-time performance engine, and
 logs more detailed modality states.
 
 This repository is a research skeleton intended for reviewers and collaborators who want to see how the mapping and logging pipeline is structured, without exposing the complete performance implementation or patent-sensitive details.
+
+
