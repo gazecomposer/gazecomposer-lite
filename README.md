@@ -2,6 +2,8 @@
 
 This repository provides a **minimal, research-focused skeleton** of the system I use to study dwell-based vibrato mapping on a 2D pitch grid.
 
+This lite demo accompanies my pilot study on dwell-based vibrato mapping described in my writing sample.
+
 To protect ongoing patent work and a larger private codebase, this repo does **not** contain the full gaze-tracking implementation or the complete performance environment. Instead, it exposes:
 
 - a simplified **5×10 pitch grid**,
