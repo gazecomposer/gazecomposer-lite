@@ -1,4 +1,3 @@
-```python
 #!/usr/bin/env python3
 """
 demo_grid_vibrato_lite.py
