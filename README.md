@@ -90,23 +90,58 @@ For example, you can compare `dwell_ms` distributions across presets, or check h
 
 At a high level, the demo follows this data flow:
 
-Mouse position  →  Grid cell / dwell tracker  →  Dwell duration
-                     ↓
-               Dwell→Vibrato mapping (preset)
-                     ↓
+Mouse position  →  Grid cell / dwell tracker  →  Dwell duration  
+                     ↓  
+               Dwell→Vibrato mapping (preset)  
+                     ↓  
                 Event logging (CSV)
+
 In the full system, the “mouse position” is replaced with webcam-based gaze coordinates that are calibrated to screen space, and the vibrato parameters modulate a continuous violin-like sound. Those details are intentionally omitted here, but the experimental structure is preserved.
 
-6. Relation to the Full System
+---
+
+## 6. Core Algorithms / Mathematical Components
+
+This lite repository exposes only a **subset** of the algorithms used in the full GazeComposer system, but the core experimental logic is preserved.
+
+### In this lite demo
+
+- **Dwell-time based fixation detection**  
+  – Tracks how long the pointer remains within a given grid cell.  
+  – Triggers a note event when dwell exceeds a configurable threshold.  
+
+- **Dwell → vibrato mapping (preset-based)**  
+  – Maps `dwell_ms` to a normalized vibrato depth parameter in `[0.0, 1.0]` using simple piecewise / compressive curves.  
+  – Supports multiple presets (`baseline`, `vib_cons`, `vib_aggr`) to emulate different expressive profiles.  
+
+- **Grid-to-pitch mapping**  
+  – Converts `(row, col)` indices and a `cell_id` into a MIDI-like pitch index, allowing comparisons across runs and presets.
+
+### In the full system (not included in this repo)
+
+The private, production codebase additionally implements:
+
+- **2D polynomial gaze calibration**  
+  – Least-squares fit from normalized iris-based ratios to screen coordinates.  
+
+- **Kalman filtering for gaze smoothing**  
+  – State-space filtering of gaze trajectories with **MAD-based outlier rejection** to handle blinks and tracking glitches.  
+
+- **Ridge-like regression for preset fitting**  
+  – Regression-style parameter fitting for mapping presets, with regularization to keep vibrato depth stable across presets while preserving perceptual differences.  
+
+These components are kept private due to ongoing patent work, but they share the same experimental structure as this lite demo:  
+calibrated gaze → smoothed trajectory → dwell detection → mapping to vibrato and other performance parameters → logging.
+
+---
+
+## 7. Relation to the Full System
 
 The full GazeComposer system:
 
-uses webcam-based gaze tracking instead of the mouse,
+- uses webcam-based gaze tracking instead of the mouse,  
+- combines gaze with mouth dynamics and hand gestures,  
+- feeds parameters into a real-time performance engine, and  
+- logs more detailed modality states.
 
-combines gaze with mouth dynamics and hand gestures,
-
-feeds parameters into a real-time performance engine, and
-
-logs more detailed modality states.
-
-This repository is a research skeleton intended for reviewers and collaborators who want to see how the mapping and logging pipeline is structured, without exposing the complete performance implementation or patent-sensitive details.
+This repository is a research skeleton intended for reviewers and collaborators who want to see how the mapping and logging pipeline is structured, **without** exposing the complete performance implementation or patent-sensitive details.
