@@ -133,7 +133,7 @@ The full system additionally implements:
   * **Trajectory Smoothing:** One-pole IIR low-pass filtering with outlier rejection:
     $$g_t = (1 - \alpha) \cdot g_{t-1} + \alpha \cdot g_t^{raw}$$
   * **Regularized Curve Fitting:**
-      * Prototype scripts (outside this repo) use **Ridge-style regression** to mathematically tune the preset curves, ensuring they meet specific expressive criteria while preventing parameter explosion.
+      * Prototype scripts (outside this repo) use **regularized least-squares (“ridge-style”) curve fitting** to mathematically tune the preset curves, ensuring they meet specific expressive criteria while preventing parameter explosion.
       * The presets in this repo are manually set to approximate those fitted curves.
 
 -----
@@ -146,7 +146,7 @@ This repository serves as a **research skeleton** for reviewers to verify:
 2.  How the mapping logic handles variable dwell times.
 3.  How interaction data is structured for quantitative analysis.
 
-It abstracts away the **gaze tracking pipeline** (OpenCV/MediaPipe) and the **audio synthesis engine** (SuperCollider/Python) to focus purely on the **Mapping & Logging** layer.
+It abstracts away the gaze tracking pipeline (OpenCV/MediaPipe) and the audio synthesis engine, in order to focus purely on the Mapping & Logging layer.
 
 -----
 
@@ -187,6 +187,7 @@ In my pilot work, I primarily used descriptive statistics to validate the mappin
   * **Logistic Regression:** To model the probability of Vibrato Onset (`vib_depth > 0`) as a function of dwell duration and grid pitch height.
   * **Survival Analysis:** Treating "maintaining a dwell" as a time-to-event process to understand engagement decay.
 
-These planned analyses build on my ongoing self-study in probability and machine learning, transforming this pilot exploration into a rigorous experimental framework.
+These planned analyses build on roughly a year of self-study in linear algebra, probability, and introductory machine learning, and are intended to turn this pilot-style mapping exploration into a more rigorous experimental framework.
+
 
 -----
