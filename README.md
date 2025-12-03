@@ -1,8 +1,8 @@
 # GazeComposer-lite: Dwell-based Grid + Vibrato Mapping (Research Skeleton)
 
-This repository provides a **minimal, research-focused skeleton** of the system I use to study dwell-based vibrato mapping on a 2D pitch grid.
+If you are reading this as part of a graduate application: this lite repository is meant to expose the experimental core of my dwell-based vibrato mapping work, which I describe in more detail in my writing sample (“A Pilot Study of Dwell-Based Vibrato Mapping in GazeComposer”).
 
-This lite demo accompanies my pilot study on dwell-based vibrato mapping described in my writing sample.
+This repository provides a **minimal, research-focused skeleton** of the system I use to study dwell-based vibrato mapping on a 2D pitch grid. It accompanies my pilot study on dwell-based vibrato mapping described in my writing sample.
 
 To protect ongoing patent work and a larger private codebase, this repo does **not** contain the full gaze-tracking implementation or the complete performance environment. Instead, it exposes:
 
@@ -14,7 +14,6 @@ To protect ongoing patent work and a larger private codebase, this repo does **n
 In this demo, a **mouse cursor stands in for gaze**. The architecture and data flow mirror the experimental pipeline used in my pilot study, but all core production code remains private.
 
 ---
-
 ## 1. Concept
 
 The goal of this demo is to make the **experimental logic** of my work reproducible:
@@ -90,11 +89,12 @@ For example, you can compare `dwell_ms` distributions across presets, or check h
 
 At a high level, the demo follows this data flow:
 
-Mouse position  →  Grid cell / dwell tracker  →  Dwell duration  
+```Mouse position  →  Grid cell / dwell tracker  →  Dwell duration  
                      ↓  
                Dwell→Vibrato mapping (preset)  
                      ↓  
                 Event logging (CSV)
+```
 
 In the full system, the “mouse position” is replaced with webcam-based gaze coordinates that are calibrated to screen space, and the vibrato parameters modulate a continuous violin-like sound. Those details are intentionally omitted here, but the experimental structure is preserved.
 
@@ -122,13 +122,16 @@ This lite repository exposes only a **subset** of the algorithms used in the ful
 The private, production codebase additionally implements:
 
 - **2D polynomial gaze calibration**  
-  – Least-squares fit from normalized iris-based ratios to screen coordinates.  
+  – **Least-squares regression (with optional L2 regularization)** from normalized iris-based ratios to screen coordinates.  
 
-- **Kalman filtering for gaze smoothing**  
-  – State-space filtering of gaze trajectories with **MAD-based outlier rejection** to handle blinks and tracking glitches.  
+- **IIR / exponential smoothing for gaze trajectories**  
+  – One-pole IIR low-pass filtering of gaze trajectories,  
+    using an exponential moving average  
+    `g_t = (1 - α) · g_{t-1} + α · g_t^{raw}`  
+    with **MAD-based outlier rejection** to handle blinks and tracking glitches.  
 
-- **Ridge-like regression for preset fitting**  
-  – Regression-style parameter fitting for mapping presets, with regularization to keep vibrato depth stable across presets while preserving perceptual differences.  
+- **Ridge-style regression for preset fitting**  
+  – Using regularized regression to fit mapping presets, keeping vibrato depth stable across presets while preserving perceptual differences.  
 
 These components are kept private due to ongoing patent work, but they share the same experimental structure as this lite demo:  
 calibrated gaze → smoothed trajectory → dwell detection → mapping to vibrato and other performance parameters → logging.
@@ -143,5 +146,59 @@ The full GazeComposer system:
 - combines gaze with mouth dynamics and hand gestures,  
 - feeds parameters into a real-time performance engine, and  
 - logs more detailed modality states.
+
+  ---
+
+## 8. Example Analysis (Python)
+
+The CSV logs are meant to be simple to analyze with standard tools.
+
+For example, if you collect several runs with different presets, you can reproduce the main pilot-style summary statistics (events per preset, mean dwell, mean vibrato depth, zero-vibrato ratio):
+
+- concatenate all `events_*.csv` files for a participant or condition
+- group by `preset`
+- compute descriptive statistics
+
+A minimal Python example:
+
+```python
+import glob
+import pandas as pd
+
+files = sorted(glob.glob("events_*.csv"))
+df = pd.concat([pd.read_csv(f) for f in files], ignore_index=True)
+
+summary = (
+    df.groupby("preset", as_index=False)
+      .agg(
+          events_total=("dwell_ms", "size"),
+          dwell_ms_mean=("dwell_ms", "mean"),
+          vib_depth_mean=("vib_depth", "mean"),
+          vib_zero_ratio=("vib_depth", lambda x: (x.fillna(0) == 0).mean()),
+      )
+)
+
+print(summary)
+```
+
+
+This mirrors the analysis pipeline used in my pilot study:
+for each vibrato preset, I look at how many note events it produces, how long participants tend to dwell, and how often the mapped vibrato depth is effectively zero.
+
+## 9. Limitations and Planned Analysis
+
+This repository focuses on the **mapping and logging skeleton** rather than full-scale data analysis. In my pilot work I primarily use descriptive statistics (e.g., dwell-time distributions, vibrato incidence per preset) to check that the mappings behave sensibly.
+
+For future work, I plan to extend this pipeline with more formal models, for example:
+
+- **Mixed-effects models** for dwell time  
+  – to compare presets while accounting for participant-level differences.  
+- **Logistic regression** for vibrato onset  
+  – modeling the probability that `vib_depth > 0` as a function of dwell time, grid position, and preset.  
+- **Survival / hazard-style analyses** for dwell durations  
+  – treating note selection as a time-to-event process.  
+
+These planned analyses build on my ongoing self-study in linear algebra, probability, and introductory machine learning, and are intended to turn this pilot-style mapping exploration into a more robust experimental framework.
+
 
 This repository is a research skeleton intended for reviewers and collaborators who want to see how the mapping and logging pipeline is structured, **without** exposing the complete performance implementation or patent-sensitive details.
