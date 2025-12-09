@@ -2,8 +2,14 @@
 
 # GazeComposer-lite: Dwell-based Grid + Vibrato Mapping (Research Skeleton)
 
-> **Note for Graduate Admissions:**
-> This repository is a **minimal, research-focused skeleton** meant to expose the experimental core of my dwell-based vibrato mapping work. It accompanies the writing sample **“A Pilot Study of Dwell-Based Vibrato Mapping in GazeComposer”**.
+## Note on Reproducibility
+
+This repository exposes a minimal, self-contained version of the dwell-based vibrato mapping
+logic used in my larger GazeComposer project. To protect ongoing IP and performance code, the
+full gaze-tracking and audio engine are not included here; instead, this repo focuses on the
+experimental core and logging pipeline so that the mapping and analysis can be inspected and
+reproduced.
+
 
 To protect ongoing patent work and a larger private codebase, this repo does **not** contain the full gaze-tracking implementation or the complete performance environment. Instead, it exposes:
 
