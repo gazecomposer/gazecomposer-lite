@@ -1,144 +1,163 @@
-## Core Algorithms (Full GazeComposer Engine – Sketch)
+\section{Core Algorithms (Sketch of Full GazeComposer Engine)}
 
-This repository exposes only a mouse-driven, grid-based skeleton. The full GazeComposer engine adds three main layers of computation. Below is a high-level description of those components, presented here to make the underlying mathematical models **inspectable** without releasing the full private codebase.
+\subsection{2D Polynomial Gaze Calibration}
 
----
+For each calibration sample $i$, we observe a feature vector
+$\mathbf{f}_i = (f_{i1}, f_{i2})$ and a target screen coordinate $(x_i, y_i)$.
+We construct a quadratic feature map
+\[
+\phi(\mathbf{f}_i)
+=
+\bigl[\, 1,\ f_{i1},\ f_{i2},\ f_{i1}^2,\ f_{i1} f_{i2},\ f_{i2}^2 \,\bigr].
+\]
 
-### 1. 2D Polynomial Gaze Calibration
-
-In the full system, raw gaze features (e.g., iris ratios) are mapped to screen coordinates via a low-order 2D polynomial with ridge regularization.
-
-For each calibration sample $i$, we observe:
-- Feature vector: $\mathbf{f}_i = (f_{i1}, f_{i2})$
-- Target screen coordinate: $(x_i, y_i)$
-
-We build a design matrix $X \in \mathbb{R}^{N \times D}$ using a quadratic basis:
-
-$$
-\phi(\mathbf{f}_i) = \big[\, 1,\ f_{i1},\ f_{i2},\ f_{i1}^2,\ f_{i1} f_{i2},\ f_{i2}^2 \,\big]
-$$
-
-Stacking these row-wise gives:
-
-$$
-X = 
+Stacking these row-wise gives the design matrix
+\[
+X =
 \begin{bmatrix}
 \phi(\mathbf{f}_1) \\
 \phi(\mathbf{f}_2) \\
 \vdots \\
 \phi(\mathbf{f}_N)
 \end{bmatrix},
-\quad
-\mathbf{x} = 
+\qquad
+\mathbf{x} =
 \begin{bmatrix}
 x_1 \\ x_2 \\ \vdots \\ x_N
 \end{bmatrix},
-\quad
-\mathbf{y} = 
+\qquad
+\mathbf{y} =
 \begin{bmatrix}
 y_1 \\ y_2 \\ \vdots \\ y_N
-\end{bmatrix}
-$$
+\end{bmatrix}.
+\]
 
-We then solve two independent ridge-regression problems to prevent overfitting to noisy gaze data:
+We solve two ridge-regression problems:
+\begin{align}
+\mathbf{w}_x^\ast
+&=
+\arg\min_{\mathbf{w}}
+\left\| X \mathbf{w} - \mathbf{x} \right\|_2^2
++ \lambda \left\| \mathbf{w} \right\|_2^2,
+\\[4pt]
+\mathbf{w}_y^\ast
+&=
+\arg\min_{\mathbf{w}}
+\left\| X \mathbf{w} - \mathbf{y} \right\|_2^2
++ \lambda \left\| \mathbf{w} \right\|_2^2.
+\end{align}
 
-$$
-\mathbf{w}_x^* = \arg\min_{\mathbf{w}} \bigl\| X \mathbf{w} - \mathbf{x} \bigr\|_2^2 + \lambda \bigl\| \mathbf{w} \bigr\|_2^2
-$$
+The closed-form solutions are
+\begin{align}
+\mathbf{w}_x^\ast
+&=
+\left( X^\top X + \lambda I \right)^{-1} X^\top \mathbf{x},\\
+\mathbf{w}_y^\ast
+&=
+\left( X^\top X + \lambda I \right)^{-1} X^\top \mathbf{y}.
+\end{align}
 
-$$
-\mathbf{w}_y^* = \arg\min_{\mathbf{w}} \bigl\| X \mathbf{w} - \mathbf{y} \bigr\|_2^2 + \lambda \bigl\| \mathbf{w} \bigr\|_2^2
-$$
+At run time, a new feature vector $\mathbf{f}$ is mapped via
+\begin{align}
+\hat{x} &= \phi(\mathbf{f}) \, \mathbf{w}_x^\ast,\\
+\hat{y} &= \phi(\mathbf{f}) \, \mathbf{w}_y^\ast.
+\end{align}
 
-These have the standard closed-form solutions:
 
-$$
-\mathbf{w}_x^* = (X^\top X + \lambda I)^{-1} X^\top \mathbf{x}
-$$
+\subsection{Temporal Smoothing (IIR Filter)}
 
-$$
-\mathbf{w}_y^* = (X^\top X + \lambda I)^{-1} X^\top \mathbf{y}
-$$
+Let $\mathbf{g}_t^{\text{raw}}$ be the instantaneous calibrated position at time $t$,
+and $\mathbf{g}_t$ the smoothed position. We apply a one-pole IIR filter:
+\begin{equation}
+\mathbf{g}_t
+=
+(1 - \alpha)\, \mathbf{g}_{t-1}
++ \alpha\, \mathbf{g}_t^{\text{raw}},
+\qquad
+0 < \alpha < 1.
+\end{equation}
 
-At runtime, each new feature vector $\mathbf{f}$ is mapped via:
+A simple jump-based outlier rejection can be expressed as
+\[
+\left\| \mathbf{g}_t^{\text{raw}} - \mathbf{g}_{t-1} \right\|
+> \tau_{\text{jump}}
+\quad\Rightarrow\quad
+\text{clamp or ignore } \mathbf{g}_t^{\text{raw}},
+\]
+for some threshold $\tau_{\text{jump}} > 0$.
 
-$$
-\hat{x} = \phi(\mathbf{f}) \cdot \mathbf{w}_x^*, \quad \hat{y} = \phi(\mathbf{f}) \cdot \mathbf{w}_y^*
-$$
 
-*Note: The mouse-based demo in this repository replaces this calibration stage by reading $(\hat{x}, \hat{y})$ directly from the cursor.*
+\subsection{Dwell-Based Note Selection}
 
----
+Let $\mathbf{g}_t$ be the smoothed position and $c_t$ the corresponding
+grid-cell index at time $t$. A \emph{dwell} is continuous residency in a single
+cell $c$ from time $t_{\text{enter}}$ to $t_{\text{exit}}$, with duration
+\[
+d = t_{\text{exit}} - t_{\text{enter}}.
+\]
 
-### 2. Temporal Smoothing and Outlier Rejection
+A note event is committed only if
+\begin{equation}
+d \;\geq\; d_{\min},
+\end{equation}
+where $d_{\min}$ is the selection threshold (e.g.\ $100\ \text{ms}$).
 
-To control jitter from raw gaze estimates, we use an exponential moving average (one-pole IIR filter) on the calibrated coordinates:
 
-$$
-\mathbf{g}_t = (1 - \alpha)\, \mathbf{g}_{t-1} + \alpha\, \mathbf{g}^{\text{raw}}_t
-$$
+\subsection{Dwell-to-Vibrato Mapping}
 
-Where:
-- $\mathbf{g}^{\text{raw}}_t$ is the instantaneous calibrated position at time $t$
-- $\mathbf{g}_t$ is the smoothed position
-- $\alpha \in (0,1)$ controls the trade-off between jitter suppression and latency (typical values: $\alpha \approx 0.3 \dots 0.5$)
+Given a dwell duration $d$, we first normalize to $[0,1]$:
+\begin{equation}
+u =
+\operatorname{clamp}
+\!\left(
+  \frac{d - d_{\min}}{d_{\max} - d_{\min}},
+  0,\,
+  1
+\right),
+\end{equation}
+where $d_{\min}$ and $d_{\max}$ define the reference range for short vs.\ long
+dwells in performance.
 
-In practice, we combine this with simple outlier rejection:
-- If $\|\mathbf{g}^{\text{raw}}_t - \mathbf{g}_{t-1}\|$ exceeds a defined jump threshold (saccade detection), the sample is strictly clamped or ignored for the dwell detector.
+Each preset $p$ is defined by a curve
+\[
+f_p : [0,1] \to [0,1], \quad u \mapsto f_p(u),
+\]
+which we interpret as a normalized vibrato depth.
 
----
+\paragraph{Baseline (no vibrato).}
+\begin{equation}
+f_{\text{base}}(u) = 0.
+\end{equation}
 
-### 3. Dwell-Based Note Selection
+\paragraph{Conservative vibrato (late onset, shallow).}
+For a conservative preset we may use
+\begin{equation}
+f_{\text{cons}}(u)
+=
+\begin{cases}
+0, &
+u < u_0,\\[6pt]
+\left(
+  \dfrac{u - u_0}{1 - u_0}
+\right)^{\gamma_{\text{cons}}}, &
+u \ge u_0,
+\end{cases}
+\end{equation}
+with $u_0 \in (0,1)$ setting the onset point and
+$\gamma_{\text{cons}} \ge 1$ controlling growth.
 
-For a given smoothed position $\mathbf{g}_t$, we compute the active grid cell index $c_t$. A **dwell** is defined as continuous residency in a single cell:
+\paragraph{More expressive preset (earlier onset, deeper).}
+A more expressive preset can use a compressive power curve, e.g.
+\begin{equation}
+f_{\text{expr}}(u) = u^{\gamma_{\text{expr}}},
+\qquad
+0 < \gamma_{\text{expr}} \le 1.
+\end{equation}
 
-- Enter time: $t_{\text{enter}}$
-- Exit time: $t_{\text{exit}}$
-- Dwell duration: $d = t_{\text{exit}} - t_{\text{enter}}$
-
-A note event is committed only if:
-
-$$
-d \geq d_{\min}
-$$
-
-Where $d_{\min}$ is the selection threshold (e.g., $100\text{ ms}$). Sub-threshold dwells are treated as noise/saccades and ignored.
-
----
-
-### 4. Dwell $\to$ Vibrato Mapping
-
-The vibrato-mapping presets in this repository approximate a more general family of curves used in the full engine.
-
-**1. Normalize dwell duration** Given a dwell duration $d$, we first normalize to $[0,1]$:
-
-$$
-u = \operatorname{clamp}\!\left( \frac{d - d_{\min}}{d_{\max} - d_{\min}},\ 0,\ 1 \right)
-$$
-
-Where $d_{\min}$ and $d_{\max}$ are lower/upper reference points for "short" and "long" dwells in performance.
-
-**2. Preset-specific depth curves** Each preset $p$ is defined by a function $f_p : [0,1] \to [0,1]$.
-
-* **Baseline (no vibrato):**
-    $$
-    f_{\text{base}}(u) = 0
-    $$
-
-* **Conservative vibrato (late onset, shallow):**
-    $$
-    f_{\text{cons}}(u) = 
-    \begin{cases} 
-      0 & u < u_0 \\
-      \left( \dfrac{u - u_0}{1 - u_0} \right)^{\gamma_{\text{cons}}} & u \ge u_0 
-    \end{cases}
-    $$
-    Where $u_0 \in (0,1)$ sets a "vibrato onset" point and $\gamma_{\text{cons}} \ge 1$ controls convexity.
-
-* **Expressive presets (earlier onset, deeper):**
-    $$
-    f_{\text{expr}}(u) = u^{\gamma_{\text{expr}}}
-    $$
-    With $0 < \gamma_{\text{expr}} \le 1$ for a more compressive, "forgiving" response.
-
-**3. Depth to synthesis parameter** The vibrato depth parameter is then $v = f_p(u)$, which is mapped to a MIDI CC in the full engine.
+\paragraph{Depth parameter.}
+The (normalized) vibrato depth parameter is then
+\begin{equation}
+v = f_p(u),
+\end{equation}
+which is finally mapped to a MIDI control or synthesis parameter in the
+audio engine.
