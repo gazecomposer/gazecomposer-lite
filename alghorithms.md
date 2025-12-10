@@ -4,7 +4,7 @@ This repository exposes only a mouse-driven, grid-based skeleton. The full GazeC
 
 ---
 
-### 1. 2D Polynomial Gaze Calibration
+1. 2D Polynomial Gaze Calibration
 
 In the full system, raw gaze features (e.g., iris ratios) are mapped to screen coordinates via a low-order 2D polynomial with ridge regularization.
 
@@ -70,7 +70,7 @@ $$
 
 ---
 
-### 2. Temporal Smoothing and Outlier Rejection
+2. Temporal Smoothing and Outlier Rejection
 
 To control jitter from raw gaze estimates, we use an exponential moving average (one-pole IIR filter) on the calibrated coordinates:
 
@@ -88,7 +88,7 @@ In practice, we combine this with simple outlier rejection:
 
 ---
 
-### 3. Dwell-Based Note Selection
+3. Dwell-Based Note Selection
 
 For a given smoothed position $\mathbf{g}_{t}$, we compute the active grid cell index $c_{t}$. A **dwell** is defined as continuous residency in a single cell:
 
@@ -106,7 +106,7 @@ Where $d_{\min}$ is the selection threshold (e.g., $100\text{ ms}$). Sub-thresho
 
 ---
 
-### 4. Dwell $\to$ Vibrato Mapping
+4. Dwell $\to$ Vibrato Mapping
 
 The vibrato-mapping presets in this repository approximate a more general family of curves used in the full engine.
 
