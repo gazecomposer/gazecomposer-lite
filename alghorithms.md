@@ -1,8 +1,3 @@
-테스트입니다.
-
-$$
-\mathbf{f}_{i} = (f_{i1}, f_{i2})
-$$
 ## Core Algorithms (Full GazeComposer Engine – Sketch)
 
 This repository exposes only a mouse-driven, grid-based skeleton. The full GazeComposer engine adds three main layers of computation. Below is a high-level description of those components.
@@ -15,9 +10,6 @@ In the full system, raw gaze features (e.g., iris ratios) are mapped to screen c
 
 For each calibration sample $i$, we observe:
 - Feature vector: $\mathbf{f}_{i} = (f_{i1}, f_{i2})$
-$$
-\mathbf{f}_{i} = (f_{i1}, f_{i2})
-$$
 - Target screen coordinate: $(x_{i}, y_{i})$
 
 We build a design matrix $X \in \mathbb{R}^{N \times D}$ using a quadratic basis:
@@ -129,25 +121,25 @@ Where $d_{\min}$ and $d_{\max}$ are lower/upper reference points for "short" and
 **2. Preset-specific depth curves** Each preset $p$ is defined by a function $f_{p} : [0,1] \to [0,1]$.
 
 * **Baseline (no vibrato):**
-    $$
-    f_{\text{base}}(u) = 0
-    $$
+$$
+f_{\text{base}}(u) = 0
+$$
 
 * **Conservative vibrato (late onset, shallow):**
-    $$
-    f_{\text{cons}}(u) = 
-    \begin{cases} 
-      0 & u < u_{0} \\
-      \left( \dfrac{u - u_{0}}{1 - u_{0}} \right)^{\gamma_{\text{cons}}} & u \ge u_{0} 
-    \end{cases}
-    $$
-    Where $u_{0} \in (0,1)$ sets a "vibrato onset" point and $\gamma_{\text{cons}} \ge 1$ controls how quickly depth grows.
+$$
+f_{\text{cons}}(u) = 
+\begin{cases} 
+  0 & u < u_{0} \\
+  \left( \dfrac{u - u_{0}}{1 - u_{0}} \right)^{\gamma_{\text{cons}}} & u \ge u_{0} 
+\end{cases}
+$$
+Where $u_{0} \in (0,1)$ sets a "vibrato onset" point and $\gamma_{\text{cons}} \ge 1$ controls how quickly depth grows.
 
 * **Expressive presets (earlier onset, deeper):**
-    $$
-    f_{\text{expr}}(u) = u^{\gamma_{\text{expr}}}
-    $$
-    With $0 < \gamma_{\text{expr}} \le 1$ for a more compressive, "forgiving" response.
+$$
+f_{\text{expr}}(u) = u^{\gamma_{\text{expr}}}
+$$
+With $0 < \gamma_{\text{expr}} \le 1$ for a more compressive, "forgiving" response.
 
 **3. Depth to synthesis parameter** The vibrato depth parameter is then:
 
