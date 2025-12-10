@@ -1,12 +1,7 @@
-테스트입니다.
-
-
-
 $$
-
 \mathbf{f}_{i} = (f_{i1}, f_{i2})
-
 $$
+
 
 ## Core Algorithms (Full GazeComposer Engine – Sketch)
 
