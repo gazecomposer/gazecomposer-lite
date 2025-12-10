@@ -15,6 +15,9 @@ In the full system, raw gaze features (e.g., iris ratios) are mapped to screen c
 
 For each calibration sample $i$, we observe:
 - Feature vector: $\mathbf{f}_{i} = (f_{i1}, f_{i2})$
+$$
+\mathbf{f}_{i} = (f_{i1}, f_{i2})
+$$
 - Target screen coordinate: $(x_{i}, y_{i})$
 
 We build a design matrix $X \in \mathbb{R}^{N \times D}$ using a quadratic basis:
