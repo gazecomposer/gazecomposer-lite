@@ -64,7 +64,9 @@ These have the standard closed-form solutions:
 $$
 \mathbf{w}_x^{*}
 = (X^\top X + \lambda I)^{-1} X^\top \mathbf{x},
-\qquad
+$$
+
+$$
 \mathbf{w}_y^{*}
 = (X^\top X + \lambda I)^{-1} X^\top \mathbf{y}.
 $$
@@ -76,6 +78,7 @@ $$
 \qquad
 \hat{y} = \phi(\mathbf{f}) \cdot \mathbf{w}_y^{*}.
 $$
+
 
 > **Note.** The mouse-based demo in this repository replaces this calibration stage by reading \((\hat{x}, \hat{y})\) directly from the cursor.
 
