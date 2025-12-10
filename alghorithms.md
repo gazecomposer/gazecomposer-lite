@@ -1,4 +1,4 @@
-## Core Algorithms (Full GazeComposer Engine – Sketch)
+Core Algorithms (Full GazeComposer Engine – Sketch)
 
 This repository exposes only a mouse-driven, grid-based skeleton. The full GazeComposer engine adds three main layers of computation. Below is a high-level description of those components.
 
