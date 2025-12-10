@@ -1,3 +1,13 @@
+테스트입니다.
+
+
+
+$$
+
+\mathbf{f}_{i} = (f_{i1}, f_{i2})
+
+$$
+
 ## Core Algorithms (Full GazeComposer Engine – Sketch)
 
 This repository exposes only a mouse-driven, grid-based skeleton. The full GazeComposer engine adds three main layers of computation. Below is a high-level description of those components.
