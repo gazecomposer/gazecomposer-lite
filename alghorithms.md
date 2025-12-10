@@ -17,9 +17,12 @@ For each calibration sample $i$, we observe:
 
 - Feature vector:
 
-  ```math
-  \mathbf{f}_{i} = (f_{i1}, f_{i2})
+  ```md
+- Feature vector:
 
+  $$
+  \mathbf{f}_{i} = (f_{i1}, f_{i2})
+  $$
 - Target screen coordinate: $(x_{i}, y_{i})$
 
 We build a design matrix $X \in \mathbb{R}^{N \times D}$ using a quadratic basis:
