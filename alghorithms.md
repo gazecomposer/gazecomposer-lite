@@ -59,6 +59,7 @@ $$
 + \lambda \bigl\| \mathbf{w} \bigr\|_{2}^{2} \Bigr).
 $$
 
+
 These have the standard closed-form solutions:
 
 $$
