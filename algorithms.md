@@ -147,7 +147,7 @@ f_{\text{cons}}(u) =
 \end{cases}
 $$
 
-where \(u_{0} \in (0, 1)\) sets a “vibrato onset” point and \(\gamma_{\text{cons}} \ge 1\) controls how quickly depth grows.
+where u0 ∈ (0, 1) sets a “vibrato onset” point and gamma_cons ≥ 1 controls how quickly depth grows.
 
 Expressive presets (earlier onset, deeper):
 
@@ -155,7 +155,7 @@ $$
 f_{\text{expr}}(u) = u^{\gamma_{\text{expr}}},
 $$
 
-with \(0 < \gamma_{\text{expr}} \le 1\) for a more compressive, forgiving response.
+with 0 < gamma_expr ≤ 1 for a more compressive, “forgiving” response.
 
 
 **3. Depth to synthesis parameter** The vibrato depth parameter is then:
