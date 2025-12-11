@@ -85,8 +85,15 @@ Where:
 - $\mathbf{g}_{t}$ is the smoothed position
 - $\alpha \in (0,1)$ controls the trade-off between jitter suppression and latency (typical values: $\alpha \approx 0.3 \dots 0.5$)
 
-In practice, we combine this with simple outlier rejection:
-- If $\|\mathbf{g}^{\text{raw}}_{t} - \mathbf{g}_{t-1}\|$ exceeds a defined jump threshold (saccade detection), the sample is strictly clamped or ignored for the dwell detector.
+In practice, we combine this with simple outlier rejection. 
+
+If
+
+$$
+\bigl\| \mathbf{g}^{\text{raw}}_{t} - \mathbf{g}_{t-1} \bigr\|
+$$
+
+exceeds a defined jump threshold (saccade detection), the sample is clamped or ignored for the dwell detector. This ensures that short-lived tracking glitches or fast saccades do not trigger spurious note events.
 
 ---
 
