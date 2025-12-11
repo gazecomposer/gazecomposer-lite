@@ -129,26 +129,34 @@ Where $d_{\min}$ and $d_{\max}$ are lower/upper reference points for "short" and
 
 **2. Preset-specific depth curves** Each preset $p$ is defined by a function $f_{p} : [0,1] \to [0,1]$.
 
-* **Baseline (no vibrato):**
-    $$
-    f_{\text{base}}(u) = 0
-    $$
+Baseline (no vibrato):
 
-* **Conservative vibrato (late onset, shallow):**
-    $$
-    f_{\text{cons}}(u) = 
-    \begin{cases} 
-      0 & u < u_{0} \\
-      \left( \dfrac{u - u_{0}}{1 - u_{0}} \right)^{\gamma_{\text{cons}}} & u \ge u_{0} 
-    \end{cases}
-    $$
-    Where $u_{0} \in (0,1)$ sets a "vibrato onset" point and $\gamma_{\text{cons}} \ge 1$ controls how quickly depth grows.
+$$
+f_{\text{base}}(u) = 0.
+$$
 
-* **Expressive presets (earlier onset, deeper):**
-    $$
-    f_{\text{expr}}(u) = u^{\gamma_{\text{expr}}}
-    $$
-    With $0 < \gamma_{\text{expr}} \le 1$ for a more compressive, "forgiving" response.
+Conservative vibrato (late onset, shallow):
+
+$$
+f_{\text{cons}}(u) =
+\begin{cases}
+  0, & u < u_{0}, \\[4pt]
+  \left(
+    \dfrac{u - u_{0}}{1 - u_{0}}
+  \right)^{\gamma_{\text{cons}}}, & u \ge u_{0},
+\end{cases}
+$$
+
+where \(u_{0} \in (0, 1)\) sets a “vibrato onset” point and \(\gamma_{\text{cons}} \ge 1\) controls how quickly depth grows.
+
+Expressive presets (earlier onset, deeper):
+
+$$
+f_{\text{expr}}(u) = u^{\gamma_{\text{expr}}},
+$$
+
+with \(0 < \gamma_{\text{expr}} \le 1\) for a more compressive, forgiving response.
+
 
 **3. Depth to synthesis parameter** The vibrato depth parameter is then:
 
